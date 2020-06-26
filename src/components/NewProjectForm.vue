@@ -41,7 +41,7 @@
                                     step="1"
                                     suffix="ONE"
                                     :rules="[rules.required, rules.tokenAmount]"
-                                    v-model="newProject.goal">
+                                    v-model="newProject.amount">
                                 </v-text-field>
                             </v-flex>
                             <v-flex xs12 sm6 class="pl-2">
@@ -64,21 +64,35 @@
                 <v-card-actions>
                     <v-spacer></v-spacer>
                     <v-btn
-                        color="blue darken-1"
-                        flat
-                        @click="addProject"
-                        :loading="newProject.isLoading">
+                            color="blue darken-1"
+                            flat
+                            dark
+                            large
+                            @click="addProject"
+                            :loading="newProject.isLoading">
                         Submit
                     </v-btn>
                 </v-card-actions>
             </v-card>
         </v-container>
+        <v-layout row justify-center>
+            <v-dialog
+                    v-model="displayError"
+                    max-width="600px"
+                    persistent>
+                <PopupCard :title="popupTitle" :msg="popupMsg" v-on:closeDialog="closeDialog"></PopupCard>
+            </v-dialog>
+        </v-layout>
     </div>
 </template>
 
 <script>
+    import PopupCard from "./PopupCode.vue";
     export default {
         name: 'NewProjectForm',
+        components: {
+            PopupCard
+        },
         data() {
             return {
                 newProject: {
@@ -90,6 +104,9 @@
                     durationLength: value => value > 0 && value <= 14 || "Max 2 week duration.",
                 },
                 canSubmit: true,
+                popupTitle: "Error",
+                popupMsg: "Unable to load wallet extension.",
+                displayError: false,
             };
         },
         computed: {
@@ -112,7 +129,15 @@
                     this.$refs[f].validate(true)
                 })
 
-                console.log("Adding Project!")
+                if (this.canSubmit) {
+                    console.log('Submitting Project!')
+                } else {
+                    console.log('Invalid form input!')
+                    this.displayError = true
+                }
+            },
+            closeDialog() {
+                this.displayError = false
             }
         }
     }
