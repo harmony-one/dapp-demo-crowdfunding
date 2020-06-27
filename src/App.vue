@@ -121,7 +121,7 @@
           Projects
         </h1>
         <v-layout row wrap>
-          <v-flex v-for="(project, index) in projectData" :key="index" xs12>
+          <v-flex v-for="(project, index) in projectList" :key="index" xs12>
             <v-dialog
               v-model="project.dialog"
               width="800"
@@ -138,7 +138,7 @@
                   <v-btn
                     color="blue darken-1"
                     flat="flat"
-                    @click="projectData[index].dialog = false"
+                    @click="projectList[index].dialog = false"
                   >
                     Close
                   </v-btn>
@@ -164,7 +164,7 @@
                     <br/>
                     <span>{{ project.projectDesc.substring(0, 100) }}</span>
                     <span v-if="project.projectDesc.length > 100">
-                      ... <a @click="projectData[index].dialog = true">[Show full]</a>
+                      ... <a @click="projectList[index].dialog = true">[Show full]</a>
                     </span>
                     <br/><br/>
                     <small>Up Until: <b>{{ new Date(project.deadline * 1000) }}</b></small>
@@ -230,6 +230,11 @@
 // We import our the scripts for the smart contract instantiation, and web3
 import NewProjectForm from './components/NewProjectForm.vue'
 import ProjectCard from './components/ProjectCard.vue'
+import {getCrowdfundingInstance} from '../contracts/crowdfunding'
+import {getProjectInstance} from "../contracts/project";
+import getExtension from './extension'
+
+
 export default {
   name: 'App',
   data() {
@@ -242,8 +247,19 @@ export default {
         { color: 'warning', text: 'Expired' },
         { color: 'success', text: 'Completed' },
       ],
-      projectData: [],
+      projectList: [],
       newProject: { isLoading: false },
+      chain: {
+        id: 2,
+        endpoint: "https://api.s0.b.hmny.io",
+        shard: 0,
+      },
+      transaction: {
+        gasLimit: 6721900,
+        gasPrice: 1000000000
+      },
+      crowdfundingInstance: null,
+      hmyExtension: null,
     };
   },
   components: {
@@ -251,17 +267,58 @@ export default {
     NewProjectForm
   },
   mounted() {
-    console.log()
+    window.addEventListener('load', () => {
+      this.hmyExtension = getExtension(this.chain.endpoint, this.chain.shard, this.chain.id)
+      this.crowdfundingInstance = getCrowdfundingInstance(this.hmyExtension)
+      this.getProjects()
+    })
+  },
+  update() {
+    this.getProjects()
   },
   methods: {
     getProjects() {
-      console.log()
+      this.crowdfundingInstance.methods.returnAllProjects().call().then((projects) => {
+        projects.forEach((address) => {
+          const projectInstance = getProjectInstance(address,   this.hmyExtension)
+          projectInstance.methods.getDetails().call().then((data) => {
+            const projectData = data;
+            projectData.isLoading = false;
+            projectData.contract = projectInstance
+            this.projectList.push(projectData)
+          })
+        })
+      }).catch(error => {
+        console.error(error)
+        // TODO: splash screen error & message
+        alert(error.message)
+      })
     },
     startProject() {
-      console.log()
     },
     fundProject(index) {
-      console.log()
+      if (!this.projectList[index].fundAmount) {
+        return;
+      }
+      this.hmyExtension.login().then((acc) => {
+        this.account = acc.account
+        const projectContract = this.projectList[index].contract;
+        this.projectList[index].isLoading = true;
+        projectContract.methods.contribute().send(
+          {
+            from: this.account,
+            gasPrice: this.transaction.gasPrice,
+            gasLimit: this.transaction.gasLimit,
+            value: this.hmyExtension.utils.toWei(this.projectList[index].fundAmount, 'ether')
+          }
+        ).then(response => {
+          console.log(response.transaction)
+        }).catch(error => {
+          this.projectList[index] = {isLoading: false};
+          console.error(error)
+          alert(error)
+        })
+      })
     },
     getRefund(index) {
       console.log()

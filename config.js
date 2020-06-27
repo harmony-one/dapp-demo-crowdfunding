@@ -1,3 +1,4 @@
+// THIS IS FOR DEPLOY USE ONLY!!!
 require('dotenv').config()
 
 let endpoint, chainID, shardID
