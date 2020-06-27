@@ -21,10 +21,10 @@ function checkCrowdfundingContract(hmy, contract) {
     assert('returnAllProjects' in methods)
     assert('startProject' in methods)
 
-    let testTitle = "test-project"
-    let testDescription = "test-description"
-    let testDuration = 10
-    let testAmount = new hmy.utils.Unit(1).asEther().toWei()
+    let testTitle = "Deploy Test Project"
+    let testDescription = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sapien velit, dapibus et tempor ut, consectetur convallis augue. Vestibulum id elementum nibh. Suspendisse potenti. Mauris in mi in sapien bibendum tincidunt. Aliquam erat volutpat. Maecenas sed dictum turpis. Morbi tristique elit nec est ullamcorper lobortis. Maecenas in varius orci. Suspendisse bibendum neque ac nisi semper, in bibendum massa vehicula. Sed non nisi ut tellus porta mollis et nec lorem."
+    let testDuration = 1
+    let testAmount = new hmy.utils.Unit(1000).asEther().toWei()
     let fromAccount = hmy.wallet.accounts[0]
     let gasPrice = new hmy.utils.Unit(process.env.GASPRICE).asWei().toWei()
     let gasLimit = process.env.GASLIMIT
