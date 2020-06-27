@@ -223,9 +223,9 @@
 
 <script>
 // We import our the scripts for the smart contract instantiation, and web3
-import NewProjectForm from './components/NewProjectForm.vue'
-import ProjectCard from './components/ProjectCard.vue'
 import LoadingScreen from "./components/LoadingScreen.vue"
+import ProjectCard from "./components/ProjectCard.vue"
+import NewProjectForm from "./components/NewProjectForm.vue"
 export default {
   name: 'App',
   data() {
@@ -243,9 +243,9 @@ export default {
     };
   },
   components: {
-      isLoading: false,
-      account: null,
-      projectList: [],
+      NewProjectForm,
+      ProjectCard,
+      LoadingScreen
     },
   };
 </script>
