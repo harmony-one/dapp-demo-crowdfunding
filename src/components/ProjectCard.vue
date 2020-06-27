@@ -25,19 +25,20 @@
                                     <br>Time remaining: {{ projectData.timeRemaining }} hour(s)
                                 </span>
                             </v-flex>
-                            <v-flex v-if="projectData.currentState === 0" xs12 sm6 class="pr-2">
+                            <v-flex v-if="projectData.currentState == 0" xs12 sm6 class="pr-2">
                                 <!--- Figure out how to put text in the center of the bar --->
                                 <v-progress-linear
                                         v-model="projectData.percentFunded"
                                         color="primary"
                                         height="20">
-                                    <strong style="font-size:12px;color:white">&emsp;&emsp;&emsp;{{ projectData.funded }} / {{ projectData.goal }} ONE</strong>
+                                    <strong style="font-size:12px;color:white">&emsp;&emsp;&emsp;&emsp;{{ projectData.funded }} / {{ projectData.goal }} ONE</strong>
                                 </v-progress-linear>
                             </v-flex>
-                            <v-flex v-if="projectData.currentState === 2" xs12 sm6 class="pr-2">
+                            <v-flex v-if="projectData.currentState == 2" xs12 sm6 class="pr-2">
                                 <!--- Figure out how to put text in the center of the bar --->
                                 <v-progress-linear
                                         v-model="projectData.percentFunded"
+                                        persistent
                                         color="success"
                                         height="20">
                                     <strong style="font-size:12px;color:white">&emsp;&emsp;&emsp;{{ projectData.goal }} ONE goal reached!</strong>
@@ -46,6 +47,7 @@
                             <v-flex v-if="projectData.currentState === 0 && projectData.timeElapsed != null" xs12 sm6 class="pl-2">
                                 <v-progress-linear
                                         v-model="projectData.timeElapsed"
+                                        persistent
                                         color="primary"
                                         height="20">
                                     <strong style="font-size:12px;color:white">&emsp;&emsp;&emsp;{{ projectData.timeRemaining }} day(s)</strong>
@@ -56,13 +58,13 @@
                 </v-card-text>
                 <v-card-actions>
                     <v-spacer></v-spacer>
-                    <v-btn v-if="projectData.currentState === 0 && notOwner"
+                    <v-btn v-if="projectData.currentState == 0 && notOwner"
                             color="blue darken-1"
                             flat
                             @click="fundProject">
                         Fund
                     </v-btn>
-                    <v-btn v-if="projectData.currentState === 1"
+                    <v-btn v-if="projectData.currentState == 1"
                            color="blue darken-1"
                            flat
                            @click="requestRefund">
@@ -83,14 +85,15 @@
 </template>
 
 <script>
-    import PopupCard from "./PopupCode.vue";
+    let date = require("date-and-time")
+    import PopupCard from "./PopupCard.vue";
     export default {
         name: 'ProjectCard',
         components: {
             PopupCard
         },
         props: {
-            inputProject: null,
+            inputProject: Object,
         },
         data() {
             return {
@@ -116,27 +119,28 @@
                 displayError: false,
             };
         },
-        mounted() {
+        created() {
             this.updateProject()
         },
         methods: {
             updateProject() {
-                this.projectData.title = inputProject.projectTitle
-                this.projectData.description = inputProject.projectDesc
-                this.projectData.currentState = inputProject.currentState
+                console.log(this.inputProject)
+                const pattern = date.compile('HH:mm:ss, MMM DD YYYY');
+                this.projectData.title = this.inputProject.projectTitle
+                this.projectData.description = this.inputProject.projectDesc
+                this.projectData.currentState = this.inputProject.currentState
 
-                let d = new Date(parseInt(inputProject.deadline))
-                this.projectData.endDate = d.format("dd.mm.yyyy hh:MM:ss")
-                let date = new Date()
-                let n = date.getTime()
-                this.projectData.timeRemaining = Math.ceil((d.getTime() - n.getTime()) * (1000 * 3600))
+                let d = new Date(parseInt(this.inputProject.deadline) * 1000)
+                this.projectData.endDate = date.format(d, pattern)
+                let n = new Date()
+                this.projectData.timeRemaining = Math.ceil((d.getTime() - n.getTime()) / (1000 * 3600))
                 this.projectData.timeElapsed = null
 
-                this.projectData.goal = parseInt(inputProject.goalAmount)
-                this.projectData.funded = parseInt(inputProject.currentAmount)
-                this.projectData.percentFunded = Math.ceil((this.projectData.percentFunded / this.projectData.goal) * 100)
+                this.projectData.goal = parseInt(this.inputProject.goalAmount) / 10**18
+                this.projectData.funded = parseInt(this.inputProject.currentAmount) / 10**18
+                this.projectData.percentFunded = Math.ceil((this.projectData.funded / this.projectData.goal) * 100)
 
-                console.log("Updating project!")
+                this.finishLoad()
             },
             fundProject() {
                 console.log("Funding project!")
@@ -147,6 +151,9 @@
             },
             closeDialog() {
                 this.displayError = false
+            },
+            finishLoad() {
+                this.$emit("finishLoad")
             }
         },
     }

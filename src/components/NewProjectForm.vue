@@ -87,7 +87,7 @@
 </template>
 
 <script>
-    import PopupCard from "./PopupCode.vue";
+    import PopupCard from "./PopupCard.vue";
     import app from '../App'
     import {getProjectInstance} from "../../contracts/project";
     import getExtension from "../extension";

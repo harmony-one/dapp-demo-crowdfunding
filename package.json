@@ -8,18 +8,21 @@
     "build": "vue-cli-service build"
   },
   "dependencies": {
-    "@harmony-js/core": "^0.1.22",
+    "@harmony-js/core": "^0.1.45",
+    "@harmony-js/network": "^0.1.45",
+    "@harmony-js/utils": "^0.1.45",
     "@openzeppelin/contracts": "^2.5.1",
+    "@vue/cli": "^4.4.6",
+    "date-and-time": "^0.13.1",
     "dotenv": "^8.1.0",
     "openzeppelin-solidity": "^2.2.0",
     "tslib": "^1.10.0",
-    "@vue/cli": "^4.4.6",
     "vue": "^2.6.6",
     "vuetify": "^1.5.0"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^3.4.0",
-    "@vue/cli-service": "^3.4.0",
+    "@vue/cli-service": "^4.4.6",
     "deepmerge": "^4.2.2",
     "fibers": "^5.0.0",
     "node-sass": "^4.14.1",
