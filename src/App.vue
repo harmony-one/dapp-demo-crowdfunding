@@ -8,7 +8,7 @@
         >
           <v-flex mb-4>
             <h1 class="display-2 font-weight-bold mb-3">
-              [Untitled Crowdfunding App]
+              [Untitled Crowdfunding dApp]
             </h1>
             <p class="subheading font-weight-regular">
               Decentralized Crowdfunding on Harmony
@@ -16,32 +16,27 @@
           </v-flex>
         </v-layout>
 
-        <v-tabs
+        <LoadingScreen v-if="isLoading"></LoadingScreen>
+
+        <v-tabs v-if="!isLoading"
           fixed-tabs
           dark
           :grow=true
         >
           <v-tab
             href=#project-list>
-            Current Projects
-          </v-tab>
-          <v-tab
-            href=#funded-list>
-            Funded Projects
+            Project List
           </v-tab>
           <v-tab
             href=#new-project>
-            New Project
+            Submit Your Project
           </v-tab>
 
-          <v-tab-item value=project-list>
-            <v-card flat tile>
-              <v-card-text>Projects</v-card-text>
-            </v-card>
-          </v-tab-item>
-
           <v-tab-item value=funded-list>
-              <ProjectCard></ProjectCard>
+              <ProjectCard v-for="proj in projectList"
+                :key="proj"
+                inputProject="proj">
+              </ProjectCard>
           </v-tab-item>
 
           <v-tab-item value=new-project>
@@ -228,18 +223,17 @@
 
 <script>
 // We import our the scripts for the smart contract instantiation, and web3
-import NewProjectForm from './components/NewProjectForm.vue'
-import ProjectCard from './components/ProjectCard.vue'
+import LoadingScreen from "./components/LoadingScreen.vue"
+import ProjectCard from "./components/ProjectCard.vue"
+import NewProjectForm from "./components/NewProjectForm.vue"
 import {getCrowdfundingInstance} from '../contracts/crowdfunding'
 import {getProjectInstance} from "../contracts/project";
 import getExtension from './extension'
-
 
 export default {
   name: 'App',
   data() {
     return {
-      tabs: 3,
       startProjectDialog: false,
       account: null,
       stateMap: [
@@ -248,6 +242,7 @@ export default {
         { color: 'success', text: 'Completed' },
       ],
       projectList: [],
+      isLoading: false,
       newProject: { isLoading: false },
       chain: {
         id: 2,
@@ -263,8 +258,9 @@ export default {
     };
   },
   components: {
+    NewProjectForm,
     ProjectCard,
-    NewProjectForm
+    LoadingScreen
   },
   mounted() {
     window.addEventListener('load', () => {
