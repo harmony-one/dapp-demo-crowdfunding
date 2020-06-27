@@ -31,7 +31,8 @@
                                         v-model="projectData.percentFunded"
                                         color="primary"
                                         height="20">
-                                    <strong style="font-size:12px;color:white">&emsp;&emsp;&emsp;&emsp;{{ projectData.funded }} / {{ projectData.goal }} ONE</strong>
+                                    <strong style="font-size:12px;color:white">&emsp;&emsp;&emsp;&emsp;{{
+                                        projectData.funded }} / {{ projectData.goal }} ONE</strong>
                                 </v-progress-linear>
                             </v-flex>
                             <v-flex v-if="projectData.currentState == 2" xs12 sm6 class="pr-2">
@@ -41,16 +42,19 @@
                                         persistent
                                         color="success"
                                         height="20">
-                                    <strong style="font-size:12px;color:white">&emsp;&emsp;&emsp;{{ projectData.goal }} ONE goal reached!</strong>
+                                    <strong style="font-size:12px;color:white">&emsp;&emsp;&emsp;{{ projectData.goal }}
+                                        ONE goal reached!</strong>
                                 </v-progress-linear>
                             </v-flex>
-                            <v-flex v-if="projectData.currentState == 0 && projectData.timeElapsed != null" xs12 sm6 class="pl-2">
+                            <v-flex v-if="projectData.currentState == 0 && projectData.timeElapsed != null" xs12 sm6
+                                    class="pl-2">
                                 <v-progress-linear
                                         v-model="projectData.timeElapsed"
                                         persistent
                                         color="primary"
                                         height="20">
-                                    <strong style="font-size:12px;color:white">&emsp;&emsp;&emsp;{{ projectData.timeRemaining }} hour(s)</strong>
+                                    <strong style="font-size:12px;color:white">&emsp;&emsp;&emsp;{{
+                                        projectData.timeRemaining }} hour(s)</strong>
                                 </v-progress-linear>
                             </v-flex>
                             <v-flex v-if="projectData.currentState == 0" xs12>
@@ -72,9 +76,9 @@
                 <v-card-actions>
                     <v-spacer></v-spacer>
                     <v-btn v-if="projectData.currentState == 0 && notOwner"
-                            color="blue darken-1"
-                            flat
-                            @click="fundProject"
+                           color="blue darken-1"
+                           flat
+                           @click="fundProject"
                            :loading="this.isLoading">
                         Fund
                     </v-btn>
@@ -129,9 +133,9 @@
                     contract: null
                 },
                 stateMap: [
-                    { color: 'primary', text: 'Ongoing' },
-                    { color: 'warning', text: 'Expired' },
-                    { color: 'success', text: 'Completed' },
+                    {color: 'primary', text: 'Ongoing'},
+                    {color: 'warning', text: 'Expired'},
+                    {color: 'success', text: 'Completed'},
                 ],
                 fundAmount: null,
                 notOwner: true,
@@ -149,8 +153,11 @@
             this.appData = app.data()
         },
         methods: {
+
+            /**
+             * Update this project with inputProject prop
+             */
             updateProject() {
-                console.log(this.inputProject)
                 const pattern = date.compile('HH:mm:ss, MMM DD YYYY');
                 this.projectData.title = this.inputProject.projectTitle
                 this.projectData.description = this.inputProject.projectDesc
@@ -163,13 +170,20 @@
                 this.projectData.timeRemaining = Math.ceil((d.getTime() - n.getTime()) / (1000 * 3600))
                 // this.projectData.timeElapsed = null
 
-                this.projectData.goal = parseInt(this.inputProject.goalAmount) / 10**18
-                this.projectData.funded = parseInt(this.inputProject.currentAmount) / 10**18
+                this.projectData.goal = parseInt(this.inputProject.goalAmount) / 10 ** 18
+                this.projectData.funded = parseInt(this.inputProject.currentAmount) / 10 ** 18
                 this.projectData.percentFunded = Math.ceil((this.projectData.funded / this.projectData.goal) * 100)
 
                 this.finishLoad()
             },
-            _fundProjectWithAccount(account){
+
+            /**
+             * Internal function to fund a project with the given account
+             *
+             * @param account - address of the account
+             * @private
+             */
+            _fundProjectWithAccount(account) {
                 const projectContract = this.projectData.contract;
                 this.isLoading = true
                 projectContract.methods.contribute().send(
@@ -190,6 +204,10 @@
                     this.displayError = true
                 })
             },
+
+            /**
+             * Fund a project with an account from the wallet extension
+             */
             fundProject() {
                 console.log("Funding project!")
                 if (!this.fundAmount) {
@@ -213,7 +231,14 @@
                     })
                 }
             },
-            _requestRefundWithAccount(account){
+
+            /**
+             * Internal function to get a request for the given account
+             *
+             * @param account - address of the given account
+             * @private
+             */
+            _requestRefundWithAccount(account) {
                 const projectContract = this.projectData.contract;
                 this.isLoading = true
                 projectContract.methods.getRefund().send({
@@ -231,6 +256,10 @@
                     this.displayError = true
                 })
             },
+
+            /**
+             * Request a refund with an account from the wallet extension.
+             */
             requestRefund() {
                 console.log("Getting Refund")
                 if (this.account != null) {
@@ -249,9 +278,17 @@
                     })
                 }
             },
+
+            /**
+             * Close any open error window
+             */
             closeDialog() {
                 this.displayError = false
             },
+
+            /**
+             * Trigger on finished load
+             */
             finishLoad() {
                 this.$emit("finishLoad")
             }

@@ -130,6 +130,7 @@
             },
         },
         mounted() {
+            // Need to executed after page load because extension may not appear in window.
             window.addEventListener('load', () => {
                 this.appData = app.data()
                 this.hmyExtension = getExtension(this.appData.chain.endpoint, this.appData.chain.shard, this.appData.chain.id)
@@ -137,6 +138,13 @@
             })
         },
         methods: {
+
+            /**
+             * Internal method, to add a project with a given account.
+             *
+             * @param account - address of account
+             * @private
+             */
             _addProjectWithAccount(account) {
                 this.newProject.isLoading = true;
                 this.crowdfundingInstance.methods.startProject(
@@ -164,6 +172,10 @@
                     this.displayError = true
                 })
             },
+
+            /**
+             * Add a project with the given wallet extension.
+             */
             addProject() {
                 this.canSubmit = true
                 Object.keys(this.form).forEach(f => {
@@ -187,6 +199,10 @@
                     })
                 }
             },
+
+            /**
+             * Close any open error window
+             */
             closeDialog() {
                 this.displayError = false
             }

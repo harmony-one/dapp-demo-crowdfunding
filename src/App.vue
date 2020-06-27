@@ -105,6 +105,10 @@ export default {
     this.getProjects()
   },
   methods: {
+    /**
+     * Load the projects into the projectList from the given
+     * crowdfunding Instance of the contract
+     */
     getProjects() {
       this.crowdfundingInstance.methods.returnAllProjects().call().then((projects) => {
         projects.forEach((address) => {
@@ -122,10 +126,13 @@ export default {
         alert(error.message)
       })
     },
+    /*ignore*/
     startProject() {
     },
+    /*ignore*/
     fundProject(index) {
     },
+    /*ignore*/
     getRefund(index) {
     },
     finishLoad() {
