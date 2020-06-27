@@ -180,6 +180,9 @@
                         this._addProjectWithAccount(acc.account)
                     })
                 }
+            },
+            closeDialog() {
+                this.$emit("closeDialog")
             }
         }
     }
