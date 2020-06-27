@@ -20,7 +20,7 @@
                                 <span>{{ projectData.description }}</span>
                             </v-flex>
                             <v-flex xs12>
-                                <span>End date: {{ projectData.endDate }}</span>
+                                <strong>End date: {{ projectData.endDate }}</strong>
                                 <span v-if="projectData.timeElapsed == null">
                                     <br>Time remaining: {{ projectData.timeRemaining }} hour(s)
                                 </span>
@@ -44,13 +44,13 @@
                                     <strong style="font-size:12px;color:white">&emsp;&emsp;&emsp;{{ projectData.goal }} ONE goal reached!</strong>
                                 </v-progress-linear>
                             </v-flex>
-                            <v-flex v-if="projectData.currentState === 0 && projectData.timeElapsed != null" xs12 sm6 class="pl-2">
+                            <v-flex v-if="projectData.currentState == 0 && projectData.timeElapsed != null" xs12 sm6 class="pl-2">
                                 <v-progress-linear
                                         v-model="projectData.timeElapsed"
                                         persistent
                                         color="primary"
                                         height="20">
-                                    <strong style="font-size:12px;color:white">&emsp;&emsp;&emsp;{{ projectData.timeRemaining }} day(s)</strong>
+                                    <strong style="font-size:12px;color:white">&emsp;&emsp;&emsp;{{ projectData.timeRemaining }} hour(s)</strong>
                                 </v-progress-linear>
                             </v-flex>
                         </v-layout>
@@ -101,7 +101,7 @@
                     title: "Project Name",
                     description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sapien velit, dapibus et tempor ut, consectetur convallis augue. Vestibulum id elementum nibh. Suspendisse potenti. Mauris in mi in sapien bibendum tincidunt. Aliquam erat volutpat. Maecenas sed dictum turpis. Morbi tristique elit nec est ullamcorper lobortis. Maecenas in varius orci. Suspendisse bibendum neque ac nisi semper, in bibendum massa vehicula. Sed non nisi ut tellus porta mollis et nec lorem.",
                     endDate: "11:05AM 06/16/2004",
-                    timeElapsed: null,
+                    timeElapsed: 1,
                     timeRemaining: 3,
                     percentFunded: (9000 / 10000) * 100,
                     funded: 9000,
@@ -134,12 +134,13 @@
                 this.projectData.endDate = date.format(d, pattern)
                 let n = new Date()
                 this.projectData.timeRemaining = Math.ceil((d.getTime() - n.getTime()) / (1000 * 3600))
-                this.projectData.timeElapsed = null
+                // this.projectData.timeElapsed = null
 
                 this.projectData.goal = parseInt(this.inputProject.goalAmount) / 10**18
                 this.projectData.funded = parseInt(this.inputProject.currentAmount) / 10**18
                 this.projectData.percentFunded = Math.ceil((this.projectData.funded / this.projectData.goal) * 100)
 
+                console.log(this.projectData.timeElapsed)
                 this.finishLoad()
             },
             fundProject() {
