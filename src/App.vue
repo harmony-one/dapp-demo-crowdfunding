@@ -36,12 +36,16 @@
               <ProjectCard v-for="proj, index in projectList"
                            :key="index"
                            :inputProject="proj"
+                           :hmy-extension="hmyExtension"
+                           :crowdfunding-instance="crowdfundingInstance"
                            v-on:finishLoad="finishLoad">
               </ProjectCard>
           </v-tab-item>
 
           <v-tab-item value=new-project>
-            <NewProjectForm></NewProjectForm>
+            <NewProjectForm :hmy-extension="hmyExtension"
+                            :crowdfunding-instance="crowdfundingInstance">
+            </NewProjectForm>
           </v-tab-item>
         </v-tabs>
       </v-container>
@@ -115,38 +119,14 @@ export default {
         })
       }).catch(error => {
         console.error(error)
-        // TODO: splash screen error & message
         alert(error.message)
       })
     },
     startProject() {
     },
     fundProject(index) {
-      if (!this.projectList[index].fundAmount) {
-        return;
-      }
-      this.hmyExtension.login().then((acc) => {
-        this.account = acc.account
-        const projectContract = this.projectList[index].contract;
-        this.projectList[index].isLoading = true;
-        projectContract.methods.contribute().send(
-          {
-            from: this.account,
-            gasPrice: this.transaction.gasPrice,
-            gasLimit: this.transaction.gasLimit,
-            value: this.hmyExtension.utils.toWei(this.projectList[index].fundAmount, 'ether')
-          }
-        ).then(response => {
-          console.log(response.transaction)
-        }).catch(error => {
-          this.projectList[index] = {isLoading: false};
-          console.error(error)
-          alert(error)
-        })
-      })
     },
     getRefund(index) {
-      console.log()
     },
     finishLoad() {
       this.isLoading = false

@@ -53,6 +53,19 @@
                                     <strong style="font-size:12px;color:white">&emsp;&emsp;&emsp;{{ projectData.timeRemaining }} hour(s)</strong>
                                 </v-progress-linear>
                             </v-flex>
+                            <v-flex v-if="projectData.currentState == 0" xs12>
+                                <v-text-field
+                                        label="Amount"
+                                        ref="amount"
+                                        placeholder="1"
+                                        type="number"
+                                        min="1"
+                                        max="100000"
+                                        step="1"
+                                        suffix="ONE"
+                                        v-model="fundAmount">
+                                </v-text-field>
+                            </v-flex>
                         </v-layout>
                     </v-container>
                 </v-card-text>
@@ -61,13 +74,15 @@
                     <v-btn v-if="projectData.currentState == 0 && notOwner"
                             color="blue darken-1"
                             flat
-                            @click="fundProject">
+                            @click="fundProject"
+                           :loading="this.isLoading">
                         Fund
                     </v-btn>
                     <v-btn v-if="projectData.currentState == 1"
                            color="blue darken-1"
                            flat
-                           @click="requestRefund">
+                           @click="requestRefund"
+                           :loading="this.isLoading">
                         Refund
                     </v-btn>
                 </v-card-actions>
@@ -87,6 +102,8 @@
 <script>
     let date = require("date-and-time")
     import PopupCard from "./PopupCard.vue";
+    import app from '../App'
+
     export default {
         name: 'ProjectCard',
         components: {
@@ -94,6 +111,8 @@
         },
         props: {
             inputProject: Object,
+            hmyExtension: Object,
+            crowdfundingInstance: Object
         },
         data() {
             return {
@@ -107,20 +126,27 @@
                     funded: 9000,
                     goal: 10000,
                     currentState: 0,
+                    contract: null
                 },
                 stateMap: [
                     { color: 'primary', text: 'Ongoing' },
                     { color: 'warning', text: 'Expired' },
                     { color: 'success', text: 'Completed' },
                 ],
+                fundAmount: null,
                 notOwner: true,
                 popupTitle: "Error",
                 popupMsg: "Unable to complete transaction to fund project.",
                 displayError: false,
+                appData: null,
+                isLoading: false
             };
         },
         created() {
             this.updateProject()
+        },
+        mounted() {
+            this.appData = app.data()
         },
         methods: {
             updateProject() {
@@ -129,6 +155,7 @@
                 this.projectData.title = this.inputProject.projectTitle
                 this.projectData.description = this.inputProject.projectDesc
                 this.projectData.currentState = this.inputProject.currentState
+                this.projectData.contract = this.inputProject.contract
 
                 let d = new Date(parseInt(this.inputProject.deadline) * 1000)
                 this.projectData.endDate = date.format(d, pattern)
@@ -140,15 +167,87 @@
                 this.projectData.funded = parseInt(this.inputProject.currentAmount) / 10**18
                 this.projectData.percentFunded = Math.ceil((this.projectData.funded / this.projectData.goal) * 100)
 
-                console.log(this.projectData.timeElapsed)
                 this.finishLoad()
+            },
+            _fundProjectWithAccount(account){
+                const projectContract = this.projectData.contract;
+                this.isLoading = true
+                projectContract.methods.contribute().send(
+                    {
+                        from: account,
+                        gasPrice: this.appData.transaction.gasPrice,
+                        gasLimit: this.appData.transaction.gasLimit,
+                        value: this.hmyExtension.utils.toWei(this.fundAmount, 'ether')
+                    }
+                ).then(response => {
+                    console.log(response.transaction)
+                    this.isLoading = false
+                    window.location.reload(false);
+                }).catch(error => {
+                    console.error(error)
+                    this.popupMsg = error.message
+                    this.isLoading = false
+                    this.displayError = true
+                })
             },
             fundProject() {
                 console.log("Funding project!")
-                this.displayError = true
+                if (!this.fundAmount) {
+                    return;
+                }
+
+                console.log("Funding Project!")
+                if (this.account != null) {
+                    this._fundProjectWithAccount(this.account)
+                } else {
+                    this.hmyExtension.login().then((acc) => {
+                        this.account = acc.account
+                        this._fundProjectWithAccount(acc.account)
+                    }).catch(error => {
+                        this.newProject = {isLoading: false};
+                        console.error(error)
+                        this.popupTitle = "Wallet Login Error"
+                        this.popupMsg = error.message
+                        this.isLoading = false
+                        this.displayError = true
+                    })
+                }
+            },
+            _requestRefundWithAccount(account){
+                const projectContract = this.projectData.contract;
+                this.isLoading = true
+                projectContract.methods.getRefund().send({
+                    from: account,
+                    gasPrice: this.appData.transaction.gasPrice,
+                    gasLimit: this.appData.transaction.gasLimit,
+                }).then(response => {
+                    console.log(response.transaction)
+                    this.isLoading = false
+                    window.location.reload(false);
+                }).catch(error => {
+                    console.error(error)
+                    this.popupMsg = error.message
+                    this.isLoading = false
+                    this.displayError = true
+                })
             },
             requestRefund() {
-                console.log("Requesting refund!")
+                console.log("Getting Refund")
+                if (this.account != null) {
+                    this._requestRefundWithAccount(this.account)
+                } else {
+                    this.hmyExtension.login().then((acc) => {
+                        this.account = acc.account
+                        this._requestRefundWithAccount(acc.account)
+                    }).catch(error => {
+                        this.newProject = {isLoading: false};
+                        console.error(error)
+                        this.popupTitle = "Wallet Login Error"
+                        this.popupMsg = error.message
+                        this.isLoading = false
+                        this.displayError = true
+                    })
+                }
             },
             closeDialog() {
                 this.displayError = false

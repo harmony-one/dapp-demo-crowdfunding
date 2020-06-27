@@ -159,8 +159,9 @@
                 }).catch(error => {
                     this.newProject = {isLoading: false};
                     console.error(error)
-                    // TODO: splash screen error & message
-                    alert(error.message)
+                    this.popupTitle = "Add Project Error"
+                    this.popupMsg = error.message
+                    this.displayError = true
                 })
             },
             addProject() {
@@ -170,7 +171,6 @@
                     this.$refs[f].validate(true)
                 })
 
-                console.log(this.newProject.amount)
                 console.log("Adding Project!")
                 if (this.account != null) {
                     this._addProjectWithAccount(this.account)
@@ -178,11 +178,17 @@
                     this.hmyExtension.login().then((acc) => {
                         this.account = acc.account
                         this._addProjectWithAccount(acc.account)
+                    }).catch(error => {
+                        this.newProject = {isLoading: false};
+                        console.error(error)
+                        this.popupTitle = "Wallet Login Error"
+                        this.popupMsg = error.message
+                        this.displayError = true
                     })
                 }
             },
             closeDialog() {
-                this.$emit("closeDialog")
+                this.displayError = false
             }
         }
     }
