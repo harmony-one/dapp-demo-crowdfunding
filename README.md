@@ -4,6 +4,10 @@
 
 [![Demo](http://img.youtube.com/vi/YWd3_6voM90/0.jpg)](https://www.youtube.com/watch?v=YWd3_6voM90 "Demo")
 
+Public website connected to Harmony testnet can be found [here](https://crowfunding.s3-us-west-1.amazonaws.com/index.html).
+
+Get some testnet token with this [faucet](https://onefaucet.ibriz.ai/).
+
 ## Run the crowdfunding dApp from scratch 
 **Be in the root of this repo**
 1) Install Truffle:
