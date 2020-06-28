@@ -1,5 +1,7 @@
 # Crowdfunding dapp example
 
+[![Demo](http://img.youtube.com/vi/YWd3_6voM90/0.jpg)](https://www.youtube.com/watch?v=YWd3_6voM90 "Demo")
+
 ## Run the crowdfunding dApp from scratch 
 **Be in the root of this repo**
 1) Install Truffle:
