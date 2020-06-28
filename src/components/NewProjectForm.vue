@@ -87,7 +87,13 @@
 </template>
 
 <script>
-    import PopupCard from "./PopupCode.vue";
+    import PopupCard from "./PopupCard.vue";
+    import app from '../App'
+    import {getProjectInstance} from "../../contracts/project";
+    import getExtension from "../extension";
+    import {getCrowdfundingInstance} from "../../contracts/crowdfunding";
+
+
     export default {
         name: 'NewProjectForm',
         components: {
@@ -107,10 +113,14 @@
                 popupTitle: "Error",
                 popupMsg: "Unable to load wallet extension.",
                 displayError: false,
+                hmyExtension: null,
+                crowdfundingInstance: null,
+                account: null,
+                appData: null
             };
         },
         computed: {
-            form () {
+            form() {
                 return {
                     title: this.newProject.title,
                     description: this.newProject.description,
@@ -119,23 +129,80 @@
                 }
             },
         },
+        mounted() {
+            // Need to executed after page load because extension may not appear in window.
+            window.addEventListener('load', () => {
+                this.appData = app.data()
+                this.hmyExtension = getExtension(this.appData.chain.endpoint, this.appData.chain.shard, this.appData.chain.id)
+                this.crowdfundingInstance = getCrowdfundingInstance(this.hmyExtension)
+            })
+        },
         methods: {
+
+            /**
+             * Internal method, to add a project with a given account.
+             *
+             * @param account - address of account
+             * @private
+             */
+            _addProjectWithAccount(account) {
+                this.newProject.isLoading = true;
+                this.crowdfundingInstance.methods.startProject(
+                    this.newProject.title,
+                    this.newProject.description,
+                    this.newProject.duration,
+                    this.hmyExtension.utils.toWei(this.newProject.amount, 'ether')
+                ).send({
+                    from: account,
+                    gasPrice: this.appData.transaction.gasPrice,
+                    gasLimit: this.appData.transaction.gasLimit
+                }).then((response) => {
+                    console.log("Project submitted!")
+                    console.log("New Project Contract address: " + response.address)
+                    console.log(response.transaction)
+                    const projectInstance = getProjectInstance(response.address, this.hmyExtension)
+                    console.log(projectInstance)
+                    this.newProject = {isLoading: false};
+                    window.location.reload(false);
+                }).catch(error => {
+                    this.newProject = {isLoading: false};
+                    console.error(error)
+                    this.popupTitle = "Add Project Error"
+                    this.popupMsg = error.message
+                    this.displayError = true
+                })
+            },
+
+            /**
+             * Add a project with the given wallet extension.
+             */
             addProject() {
                 this.canSubmit = true
-
                 Object.keys(this.form).forEach(f => {
                     if (!this.form[f]) this.canSubmit = false
-
                     this.$refs[f].validate(true)
                 })
 
-                if (this.canSubmit) {
-                    console.log('Submitting Project!')
+                console.log("Adding Project!")
+                if (this.account != null) {
+                    this._addProjectWithAccount(this.account)
                 } else {
-                    console.log('Invalid form input!')
-                    this.displayError = true
+                    this.hmyExtension.login().then((acc) => {
+                        this.account = acc.account
+                        this._addProjectWithAccount(acc.account)
+                    }).catch(error => {
+                        this.newProject = {isLoading: false};
+                        console.error(error)
+                        this.popupTitle = "Wallet Login Error"
+                        this.popupMsg = error.message
+                        this.displayError = true
+                    })
                 }
             },
+
+            /**
+             * Close any open error window
+             */
             closeDialog() {
                 this.displayError = false
             }
