@@ -11,7 +11,7 @@
               [Untitled Crowdfunding dApp]
             </h1>
             <p class="subheading font-weight-regular">
-              Decentralized Crowdfunding on Harmony
+              Decentralized Crowdfunding on Harmony (testnet)
             </p>
           </v-flex>
         </v-layout>

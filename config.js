@@ -16,8 +16,8 @@ switch (process.env.NETWORK) {
         break;
     }
     case 'mainnet': {
-        endpoint = "https://api.s" + process.env.SHARD + ".b.hmny.io"
-        chainID = 0
+        endpoint = "https://api.s" + process.env.SHARD + ".t.hmny.io"
+        chainID = 1
         shardID = process.env.SHARD
         break;
     }
