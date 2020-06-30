@@ -4,7 +4,7 @@
 
 [![Demo](http://img.youtube.com/vi/YWd3_6voM90/0.jpg)](https://www.youtube.com/watch?v=YWd3_6voM90 "Demo")
 
-Public website connected to Harmony testnet can be found [here](https://crowfunding.s3-us-west-1.amazonaws.com/index.html).
+Public website connected to Harmony testnet can be found [here](https://crowdfunding-testnet.s3-us-west-1.amazonaws.com/index.html).
 
 Get some testnet token with this [faucet](https://onefaucet.ibriz.ai/).
 
@@ -47,7 +47,7 @@ npm run serve
 
 **Curious on how a user can interface with a dapp running on harmony? Here is a high level:**
 * In this project, we use the Harmony extension found in the JS SDK ([mathwallet](https://www.mathwallet.org/harmony-wallet/en/)).
-* Code to fetch an instance of the 2 smart contracts used by this project can be found in `./contracts/project.js` & `./contracts/crowdfunding.js`.
+* Code to fetch an instance of the 2 smart contracts can be found in `./contracts/project.js` & `./contracts/crowdfunding.js`.
 * Code to instantiate a harmony extension object (for signing transactions and talking to smart contracts) can be found in `./src/extension.js`
 * Functions for loading crowdfunding projects (fetching project info from contract) can be found in `./src/App.vue`
 * Functions for creating a project (creating a project contract using the user's wallet) can be found in `./src/components/NewProjectForm.vue`
